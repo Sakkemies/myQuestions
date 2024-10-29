@@ -103,6 +103,7 @@ public class FXMLController implements Initializable {
         Label questionLabel = new Label(question.getQuestionAsString());
         questionLabel.setWrapText(true);
         questionLabel.setBackground(new Background(new BackgroundFill(Color.valueOf("#7ea6a5"), null, null)));
+        questionLabel.setStyle("-fx-font-size: 18;");
         questionLabel.setPadding(new Insets(20));
         questionLabel.setPrefWidth(Double.MAX_VALUE);
         questionLabel.setMinWidth(0);
@@ -118,6 +119,14 @@ public class FXMLController implements Initializable {
             for (Answer answer : question.getAnswers()) {
                 CheckBox answerCheckBox = new CheckBox(answer.getAnswerAsText());
                 answersVBox.getChildren().add(answerCheckBox);
+
+                answerCheckBox.setPrefWidth(Double.MAX_VALUE);
+                answerCheckBox.setMinWidth(0);
+                answerCheckBox.setMaxWidth(Double.MAX_VALUE);
+                answerCheckBox.setWrapText(true);
+                VBox.setVgrow(answerCheckBox, Priority.ALWAYS);
+                answerCheckBox.setStyle("-fx-font-size: 15;");
+                answerCheckBox.setPadding(new Insets(5));
             }
         }
         else {
@@ -127,6 +136,14 @@ public class FXMLController implements Initializable {
                 answerRadioButton.setToggleGroup(toggleGroup);
 
                 answersVBox.getChildren().add(answerRadioButton);
+
+                answerRadioButton.setPrefWidth(Double.MAX_VALUE);
+                answerRadioButton.setMinWidth(0);
+                answerRadioButton.setMaxWidth(Double.MAX_VALUE);
+                answerRadioButton.setWrapText(true);
+                VBox.setVgrow(answerRadioButton, Priority.ALWAYS);
+                answerRadioButton.setStyle("-fx-font-size: 15;");
+                answerRadioButton.setPadding(new Insets(5));
             }
         }
 
