@@ -20,6 +20,9 @@ public class Answer
     {
         return right;
     }
+    public void addText(String text, boolean isNewLine) {
+        answer+= (isNewLine ? "\n" : "") + text;
+    }
     @Override
     public String toString()
     {

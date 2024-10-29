@@ -109,6 +109,9 @@ public class FXMLController implements Initializable {
         questionLabel.setMinWidth(0);
         questionLabel.setMaxWidth(Double.MAX_VALUE);
         VBox.setVgrow(questionLabel, Priority.ALWAYS);
+        questionLabel.setPrefHeight(Region.USE_COMPUTED_SIZE);
+        questionLabel.setMinHeight(Region.USE_PREF_SIZE);
+        questionLabel.setMaxHeight(Region.USE_COMPUTED_SIZE);
 
         VBox answersVBox = new VBox();
         answersVBox.setPadding(new Insets(20));

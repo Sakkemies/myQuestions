@@ -27,6 +27,9 @@ public class Question
     {
         return question;
     }
+    public void addText(String text, boolean isNewLine) {
+        question+= (isNewLine ? "\n" : "") + text;
+    }
     @Override
     public String toString() {
         String answers = "";
