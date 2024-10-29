@@ -7,6 +7,7 @@ import org.lizkozz.models.QuestionBuilder;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class Memory
@@ -23,5 +24,11 @@ public class Memory
     {
         for(Question question: questions)
             System.out.println(question);
+    }
+    public static void shuffle()
+    {
+        Collections.shuffle(questions);
+        for(Question question: questions)
+            Collections.shuffle(question.getAnswers());
     }
 }

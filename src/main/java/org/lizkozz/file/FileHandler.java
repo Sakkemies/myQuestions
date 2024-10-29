@@ -10,14 +10,14 @@ import java.util.List;
 
 public class FileHandler
 {
-    public void openFile(Window owner, FileChooser.ExtensionFilter extension)
+    public File openFile(Window owner, FileChooser.ExtensionFilter extension)
     {
         List<FileChooser.ExtensionFilter> extensionFilters = new ArrayList<>();
         extensionFilters.add(extension);
 
-        openFile(owner, extensionFilters);
+        return openFile(owner, extensionFilters);
     }
-    public void openFile(Window owner, List<FileChooser.ExtensionFilter> extension)
+    public File openFile(Window owner, List<FileChooser.ExtensionFilter> extension)
     {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Avaa Tiedosto");
@@ -25,7 +25,6 @@ public class FileHandler
         for(FileChooser.ExtensionFilter extensionFilter: extension)
             fileChooser.getExtensionFilters().add(extensionFilter);
 
-        File file = fileChooser.showOpenDialog(owner);
-        Memory.setQuestions(file);
+        return fileChooser.showOpenDialog(owner);
     }
 }

@@ -12,6 +12,14 @@ public class Answer
         answer = text;
         right = isRight;
     }
+    public String getAnswerAsText()
+    {
+        return answer;
+    }
+    public boolean isRight()
+    {
+        return right;
+    }
     @Override
     public String toString()
     {
