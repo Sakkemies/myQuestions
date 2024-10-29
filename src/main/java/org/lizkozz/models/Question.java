@@ -53,4 +53,14 @@ public class Question
 
         return count > 0;
     }
+    public boolean isCorrect(boolean userAnswer, int answerIndex) {
+        try
+        {
+            return getAnswers().get(answerIndex).isRight() == userAnswer;
+        }
+        catch (Exception e)
+        {
+            return false;
+        }
+    }
 }

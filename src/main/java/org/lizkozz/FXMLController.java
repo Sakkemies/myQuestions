@@ -1,6 +1,7 @@
 package org.lizkozz;
 
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
 
@@ -9,11 +10,9 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
+import javafx.scene.Node;
 import javafx.scene.control.*;
-import javafx.scene.layout.Background;
-import javafx.scene.layout.BackgroundFill;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import org.lizkozz.file.FileHandler;
 import org.lizkozz.memory.Memory;
@@ -26,6 +25,12 @@ public class FXMLController implements Initializable {
 
     @FXML
     public TabPane questionBox;
+    @FXML
+    public Button previousQuestion;
+    @FXML
+    public Button nextQuestion;
+    @FXML
+    public Button submit;
     @FXML
     private MenuBar menuBar;
 
@@ -40,6 +45,12 @@ public class FXMLController implements Initializable {
     private void initializeQuestionBox()
     {
         questionBox.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);
+
+        nextQuestion.setOnAction(event -> switchToNextTab());
+        previousQuestion.setOnAction(event -> switchToPreviousTab());
+
+        submit.setOnAction(event -> checkAllAnswers());
+        updateButtonState();
     }
     private void initializeMenu()
     {
@@ -74,7 +85,6 @@ public class FXMLController implements Initializable {
         List<Question> questionList = Memory.getQuestions();
         questionBox.getTabs().clear();
 
-
         for(int i = 0; i < questionList.size(); i++)
         {
             if(questionList.get(i).isValid()) {
@@ -83,17 +93,21 @@ public class FXMLController implements Initializable {
                 setQuestion(tab, questionList.get(i));
             }
         }
+
+        updateButtonState();
     }
 
     private void setQuestion(Tab tab, Question question)
     {
         VBox vBox = new VBox();
         Label questionLabel = new Label(question.getQuestionAsString());
+        questionLabel.setWrapText(true);
         questionLabel.setBackground(new Background(new BackgroundFill(Color.valueOf("#7ea6a5"), null, null)));
         questionLabel.setPadding(new Insets(20));
         questionLabel.setPrefWidth(Double.MAX_VALUE);
         questionLabel.setMinWidth(0);
         questionLabel.setMaxWidth(Double.MAX_VALUE);
+        VBox.setVgrow(questionLabel, Priority.ALWAYS);
 
         VBox answersVBox = new VBox();
         answersVBox.setPadding(new Insets(20));
@@ -118,5 +132,85 @@ public class FXMLController implements Initializable {
 
         tab.setContent(vBox);
         questionBox.getTabs().add(tab);
+    }
+
+    private void switchToPreviousTab() {
+        int currentIndex = questionBox.getSelectionModel().getSelectedIndex();
+        if (currentIndex > 0) {
+            questionBox.getSelectionModel().select(currentIndex - 1);
+        }
+        updateButtonState();
+    }
+
+    private void switchToNextTab() {
+        int currentIndex = questionBox.getSelectionModel().getSelectedIndex();
+        if (currentIndex < questionBox.getTabs().size() - 1) {
+            questionBox.getSelectionModel().select(currentIndex + 1);
+        }
+        updateButtonState();
+    }
+    private void updateButtonState() {
+        int currentIndex = questionBox.getSelectionModel().getSelectedIndex();
+        previousQuestion.setDisable(currentIndex == 0 || Memory.getQuestions().isEmpty());
+        nextQuestion.setDisable(currentIndex == questionBox.getTabs().size() - 1);
+    }
+    private void checkAllAnswers() {
+        List<Question> questionList = Memory.getQuestions();
+        int maxScore = questionList.size();
+        int currentScore = 0;
+
+        for (Question question : questionList)
+        {
+            VBox vbox = (VBox) questionBox.getTabs().get(questionList.indexOf(question)).getContent();
+
+            System.out.println(vbox.getChildren().size());
+            VBox answerBox = (VBox) vbox.getChildren().get(1);
+
+            boolean isAllRight = true;
+            for (int i = 0; i < answerBox.getChildren().size(); i++)
+            {
+                Node node = answerBox.getChildren().get(i);
+                if (node instanceof CheckBox checkBox)
+                {
+                    boolean isTrue = question.isCorrect(checkBox.isSelected(), i);
+                    if(!isTrue)
+                    {
+                        isAllRight = false;
+                        checkBox.setBackground(new Background(new BackgroundFill(Color.valueOf("#ff9ca5"), null, null)));
+                        //checkBox.setText(checkBox.getText() + " (VIRHEELLINEN!)");
+                    }
+                    else
+                        checkBox.setBackground(new Background(new BackgroundFill(Color.valueOf("#bdffbd"), null, null)));
+
+                }
+                else if (node instanceof RadioButton checkBox)
+                {
+                    boolean isTrue = question.isCorrect(checkBox.isSelected(), i);
+                    if(!isTrue)
+                    {
+                        isAllRight = false;
+                        checkBox.setBackground(new Background(new BackgroundFill(Color.valueOf("#ff9ca5"), null, null)));
+                        //checkBox.setText(checkBox.getText() + " (VIRHEELLINEN!)");
+                    }
+                    else
+                        checkBox.setBackground(new Background(new BackgroundFill(Color.valueOf("#bdffbd"), null, null)));
+                }
+            }
+            if(isAllRight)
+                currentScore++;
+        }
+
+        showScoreDialog(currentScore, maxScore);
+    }
+    private void showScoreDialog(int currentScore, int maxScore) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Tulos");
+        alert.setHeaderText("Suorituksesi on arvioitu");
+        double percentage = ((double) currentScore / maxScore) * 100;
+        String percentageText = String.format("%.2f", percentage);
+
+        alert.setContentText("Pisteet: " + currentScore + "/" + maxScore + "\nOnnistumisprosentti: " + percentageText + "%");
+
+        alert.showAndWait();
     }
 }
