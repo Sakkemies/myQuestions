@@ -11,6 +11,9 @@ import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
+import org.lizkozz.file.FileHandler;
+import org.lizkozz.memory.Memory;
+import org.lizkozz.resources.Extensions;
 import org.lizkozz.resources.UIUtilities;
 
 public class FXMLController implements Initializable {
@@ -29,13 +32,18 @@ public class FXMLController implements Initializable {
     private void initializeMenu()
     {
         Menu fileMenu = UIUtilities.getMenu("Tiedosto");
+
         MenuItem exit = UIUtilities.getMenuItem("Sulje");
         exit.setOnAction(event -> {
             Platform.exit();
             System.exit(0);
         });
+
         MenuItem loadQuestions = UIUtilities.getMenuItem("Lataa kysymykset");
+        loadQuestions.setOnAction(event -> new FileHandler().openFile(menuBar.getScene().getWindow(), Extensions.TXT_FILES));
+
         MenuItem clearQuestions = UIUtilities.getMenuItem("Nollaa kysymykset");
+        clearQuestions.setOnAction(event -> Memory.clearQuestions());
 
         fileMenu.getItems().addAll(clearQuestions, loadQuestions, exit);
 
