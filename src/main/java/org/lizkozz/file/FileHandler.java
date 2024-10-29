@@ -2,7 +2,6 @@ package org.lizkozz.file;
 
 import javafx.stage.FileChooser;
 import javafx.stage.Window;
-import org.lizkozz.memory.Memory;
 
 import java.io.File;
 import java.util.ArrayList;

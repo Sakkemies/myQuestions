@@ -183,7 +183,6 @@ public class FXMLController implements Initializable {
         {
             VBox vbox = (VBox) questionBox.getTabs().get(questionList.indexOf(question)).getContent();
 
-            System.out.println(vbox.getChildren().size());
             VBox answerBox = (VBox) vbox.getChildren().get(1);
 
             boolean isAllRight = true;
