@@ -88,6 +88,7 @@ public class Question
             return false;
         }
     }
+    public boolean isCorrect(int answerIndex){return getAnswers().get(answerIndex).isRight();}
     public void addImage(String path)
     {
         if(images == null)

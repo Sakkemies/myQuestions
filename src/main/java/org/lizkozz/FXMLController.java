@@ -2,12 +2,10 @@ package org.lizkozz;
 
 import java.io.File;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
 
 import javafx.application.Platform;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
@@ -66,8 +64,8 @@ public class FXMLController implements Initializable {
         nextQuestion.setOnAction(event -> switchToNextTab());
         previousQuestion.setOnAction(event -> switchToPreviousTab());
 
-        submit.setOnAction(event -> checkAllAnswers());
-        check.setOnAction(event -> checkCurrentAnswer());
+        submit.setOnAction(event -> checkAllQuestions());
+        check.setOnAction(event -> checkCurrentQuestion());
         updateButtonState();
 
         setButtonSize(120,100, nextQuestion);
@@ -203,10 +201,13 @@ public class FXMLController implements Initializable {
                 CheckBox answerCheckBox = new CheckBox(answer.getAnswerAsText());
                 answersVBox.getChildren().add(answerCheckBox);
 
-                answerCheckBox.setPrefWidth(Double.MAX_VALUE);
-                answerCheckBox.setMinWidth(0);
-                answerCheckBox.setMaxWidth(Double.MAX_VALUE);
+                //answerCheckBox.setPrefWidth(Double.MAX_VALUE);
+                //answerCheckBox.setMinWidth(0);
+                //answerCheckBox.setMaxWidth(Double.MAX_VALUE);
                 answerCheckBox.setWrapText(true);
+                answerCheckBox.setPrefHeight(Region.USE_COMPUTED_SIZE);
+                answerCheckBox.setMinHeight(Region.USE_PREF_SIZE);
+                answerCheckBox.setMaxHeight(Region.USE_COMPUTED_SIZE);
                 VBox.setVgrow(answerCheckBox, Priority.ALWAYS);
                 answerCheckBox.setStyle("-fx-font-size: 15;");
                 answerCheckBox.setPadding(new Insets(5));
@@ -220,10 +221,13 @@ public class FXMLController implements Initializable {
 
                 answersVBox.getChildren().add(answerRadioButton);
 
-                answerRadioButton.setPrefWidth(Double.MAX_VALUE);
-                answerRadioButton.setMinWidth(0);
-                answerRadioButton.setMaxWidth(Double.MAX_VALUE);
+                //answerRadioButton.setPrefWidth(Double.MAX_VALUE);
+                //answerRadioButton.setMinWidth(0);
+                //answerRadioButton.setMaxWidth(Double.MAX_VALUE);
                 answerRadioButton.setWrapText(true);
+                answerRadioButton.setPrefHeight(Region.USE_COMPUTED_SIZE);
+                answerRadioButton.setMinHeight(Region.USE_PREF_SIZE);
+                answerRadioButton.setMaxHeight(Region.USE_COMPUTED_SIZE);
                 VBox.setVgrow(answerRadioButton, Priority.ALWAYS);
                 answerRadioButton.setStyle("-fx-font-size: 15;");
                 answerRadioButton.setPadding(new Insets(5));
@@ -232,6 +236,8 @@ public class FXMLController implements Initializable {
 
         tab.setContent(scrollPane);
         questionBox.getTabs().add(tab);
+
+        tab.setOnSelectionChanged(event -> updateButtonState());
     }
 
     private void switchToPreviousTab() {
@@ -255,7 +261,7 @@ public class FXMLController implements Initializable {
         nextQuestion.setDisable(currentIndex == questionBox.getTabs().size() - 1);
     }
 
-    private void checkCurrentAnswer() {
+    private void checkCurrentQuestion() {
         try {
             int currentIndex = questionBox.getSelectionModel().getSelectedIndex();
             Question question = Memory.getQuestions().get(currentIndex);
@@ -264,32 +270,80 @@ public class FXMLController implements Initializable {
 
             VBox answerBox = (VBox) vbox.getChildren().get(2);
 
+            boolean isRight = true;
             for (int i = 0; i < answerBox.getChildren().size(); i++)
             {
                 Node node = answerBox.getChildren().get(i);
-                if (node instanceof CheckBox checkBox)
-                {
-                    boolean isTrue = question.isCorrect(checkBox.isSelected(), i);
-                    if(!isTrue) {
-                        checkBox.setBackground(new Background(new BackgroundFill(Color.valueOf(COLOR_RED), null, null)));
-                    }
-                    else
-                        checkBox.setBackground(new Background(new BackgroundFill(Color.valueOf(COLOR_GREEN), null, null)));
-                }
-                else if (node instanceof RadioButton checkBox)
-                {
-                    boolean isTrue = question.isCorrect(checkBox.isSelected(), i);
-                    if(!isTrue) {
-                        checkBox.setBackground(new Background(new BackgroundFill(Color.valueOf(COLOR_RED), null, null)));
-                    }
-                    else
-                        checkBox.setBackground(new Background(new BackgroundFill(Color.valueOf(COLOR_GREEN), null, null)));
-                }
+
+                if(isRight)
+                    isRight = colorizeQuestion(node, i, question);
+                else
+                    colorizeQuestion(node, i, question);
             }
+
+            showSingleAnswerDialog(isRight);
         }
         catch (Exception e){}
     }
-    private void checkAllAnswers() {
+    private static final Border answerBorder = new Border(new BorderStroke(
+            Color.BLACK,
+            BorderStrokeStyle.DOTTED,
+            CornerRadii.EMPTY,
+            new BorderWidths(1)
+    ));
+    private boolean colorizeQuestion(Node node, int index, Question question)
+    {
+        boolean isAllRight = true;
+
+        if (node instanceof CheckBox checkBox)
+        {
+            checkBox.setBorder(Border.EMPTY);
+            checkBox.setBackground(Background.EMPTY);
+            boolean isTrue = question.isCorrect(checkBox.isSelected(), index);
+            if(!isTrue)
+            {
+                isAllRight = false;
+                if(question.isCorrect(index) && !checkBox.isSelected())
+                {
+                    checkBox.setBackground(new Background(new BackgroundFill(Color.valueOf(COLOR_RED), null, null)));
+                    checkBox.setBorder(answerBorder);
+                }
+            }
+            else
+            {
+                if(question.isCorrect(index) && checkBox.isSelected())
+                {
+                    checkBox.setBackground(new Background(new BackgroundFill(Color.valueOf(COLOR_GREEN), null, null)));
+                    checkBox.setBorder(answerBorder);
+                }
+            }
+
+        }
+        else if (node instanceof RadioButton checkBox)
+        {
+            boolean isTrue = question.isCorrect(checkBox.isSelected(), index);
+            if(!isTrue)
+            {
+                isAllRight = false;
+                if(question.isCorrect(index) && !checkBox.isSelected())
+                {
+                    checkBox.setBackground(new Background(new BackgroundFill(Color.valueOf(COLOR_RED), null, null)));
+                    checkBox.setBorder(answerBorder);
+                }
+            }
+            else
+            {
+                if(question.isCorrect(index) && checkBox.isSelected())
+                {
+                    checkBox.setBackground(new Background(new BackgroundFill(Color.valueOf(COLOR_GREEN), null, null)));
+                    checkBox.setBorder(answerBorder);
+                }
+            }
+        }
+
+        return isAllRight;
+    }
+    private void checkAllQuestions() {
         List<Question> questionList = Memory.getQuestions();
         int maxScore = questionList.size();
         int currentScore = 0;
@@ -304,29 +358,10 @@ public class FXMLController implements Initializable {
             for (int i = 0; i < answerBox.getChildren().size(); i++)
             {
                 Node node = answerBox.getChildren().get(i);
-                if (node instanceof CheckBox checkBox)
-                {
-                    boolean isTrue = question.isCorrect(checkBox.isSelected(), i);
-                    if(!isTrue)
-                    {
-                        isAllRight = false;
-                        checkBox.setBackground(new Background(new BackgroundFill(Color.valueOf(COLOR_RED), null, null)));
-                    }
-                    else
-                        checkBox.setBackground(new Background(new BackgroundFill(Color.valueOf(COLOR_GREEN), null, null)));
-
-                }
-                else if (node instanceof RadioButton checkBox)
-                {
-                    boolean isTrue = question.isCorrect(checkBox.isSelected(), i);
-                    if(!isTrue)
-                    {
-                        isAllRight = false;
-                        checkBox.setBackground(new Background(new BackgroundFill(Color.valueOf(COLOR_RED), null, null)));
-                    }
-                    else
-                        checkBox.setBackground(new Background(new BackgroundFill(Color.valueOf(COLOR_GREEN), null, null)));
-                }
+                if(isAllRight)
+                    isAllRight = colorizeQuestion(node, i, question);
+                else
+                    colorizeQuestion(node, i, question);
             }
             if(isAllRight)
                 currentScore++;
@@ -334,8 +369,8 @@ public class FXMLController implements Initializable {
 
         showScoreDialog(currentScore, maxScore);
     }
-    private String COLOR_RED = "#f7cde3";
-    private String COLOR_GREEN = "#cdf7d2";
+    private String COLOR_RED = "#ff6363";
+    private String COLOR_GREEN = "#e0ffea";
     private void showScoreDialog(int currentScore, int maxScore) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle("Tulos");
@@ -344,6 +379,15 @@ public class FXMLController implements Initializable {
         String percentageText = String.format("%.2f", percentage);
 
         alert.setContentText("Pisteet: " + currentScore + "/" + maxScore + "\nOnnistumisprosentti: " + percentageText + "%");
+
+        alert.showAndWait();
+    }
+    private void showSingleAnswerDialog(boolean isRight) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Vastauksesi on...");
+        alert.setHeaderText(isRight ? "Oikea vastaus!\n" : "Virheellinen vastaus!\n");
+
+        alert.setContentText(isRight ? "Vastauksesi on oikein!" : "Vastauksesi on virheellinen!");
 
         alert.showAndWait();
     }

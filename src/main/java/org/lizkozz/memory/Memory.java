@@ -10,6 +10,8 @@ import java.util.List;
 
 public class Memory
 {
+    private static String version = "0.3.0";
+    private static String appName = "myQuestions";
     private static boolean shuffleOn = true;
     public static void setShuffle(boolean shuffle) {shuffleOn = shuffle;}
     public static boolean isShuffle(){return shuffleOn;}
@@ -33,5 +35,9 @@ public class Memory
             for (Question question : questions)
                 Collections.shuffle(question.getAnswers());
         }
+    }
+    public static String getAppName()
+    {
+        return appName + " " + version;
     }
 }

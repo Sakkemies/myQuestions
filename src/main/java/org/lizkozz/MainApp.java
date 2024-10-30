@@ -21,7 +21,7 @@ public class MainApp extends Application {
         Scene scene = new Scene(root);
         scene.getStylesheets().add(ResourceHandler.getResourceAsString(this,Resource.STYLES));
 
-        stage.setTitle("myQuestions v0.2");
+        stage.setTitle(Memory.getAppName());
         stage.setScene(scene);
         stage.show();
     }
