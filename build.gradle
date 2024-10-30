@@ -21,4 +21,19 @@ application {
     mainClass = 'org.lizkozz.MainClass' // Aseta pääluokan nimi
 }
 
+jlink {
+    options = ['--strip-debug', '--compress', '2', '--no-header-files', '--no-man-pages']
+
+    jpackage {
+        installerType = 'exe'
+        //imageOptions = ['--icon', 'src/main/resources/org/lizkozz/icon.ico']
+        installerOptions = [
+                '--win-dir-chooser',
+                '--win-shortcut',
+                '--win-menu',
+                '--win-menu-group', 'MyAppGroup'
+        ]
+    }
+}
+
 mainClassName = 'org.lizkozz.MainApp'

@@ -1,5 +1,6 @@
 package org.lizkozz;
 
+import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -10,10 +11,16 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Node;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
 import org.lizkozz.file.FileHandler;
 import org.lizkozz.memory.Memory;
 import org.lizkozz.models.Answer;
@@ -32,6 +39,8 @@ public class FXMLController implements Initializable {
     @FXML
     public Button submit;
     @FXML
+    public HBox buttonBox;
+    @FXML
     private MenuBar menuBar;
 
     @Override
@@ -41,6 +50,11 @@ public class FXMLController implements Initializable {
 
         initializeMenu();
         initializeQuestionBox();
+        initializeImageBox();
+    }
+    private void initializeImageBox()
+    {
+
     }
     private void initializeQuestionBox()
     {
@@ -51,6 +65,19 @@ public class FXMLController implements Initializable {
 
         submit.setOnAction(event -> checkAllAnswers());
         updateButtonState();
+
+        setButtonSize(150,100, nextQuestion);
+        setButtonSize(150,100, submit);
+        setButtonSize(150,100, previousQuestion);
+
+        buttonBox.setPadding(new Insets(10));
+        buttonBox.setBackground(new Background(new BackgroundFill(Color.valueOf("#7ea6a5"), null, null)));
+    }
+    private void setButtonSize(double width, double height, Button button)
+    {
+        button.setMaxSize(width, height);
+        button.setPrefSize(width, height);
+        button.setMinSize(width, height);
     }
     private void initializeMenu()
     {
@@ -89,7 +116,7 @@ public class FXMLController implements Initializable {
         {
             if(questionList.get(i).isValid()) {
                 Tab tab = new Tab();
-                tab.setText("Kysymys " + (i + 1));
+                tab.setText("Q" + (i + 1));
                 setQuestion(tab, questionList.get(i));
             }
         }
@@ -103,7 +130,7 @@ public class FXMLController implements Initializable {
         Label questionLabel = new Label(question.getQuestionAsString());
         questionLabel.setWrapText(true);
         questionLabel.setBackground(new Background(new BackgroundFill(Color.valueOf("#7ea6a5"), null, null)));
-        questionLabel.setStyle("-fx-font-size: 18;");
+        questionLabel.setStyle("-fx-font-size: 18; -fx-font-weight: bold;");
         questionLabel.setPadding(new Insets(20));
         questionLabel.setPrefWidth(Double.MAX_VALUE);
         questionLabel.setMinWidth(0);
@@ -113,10 +140,32 @@ public class FXMLController implements Initializable {
         questionLabel.setMinHeight(Region.USE_PREF_SIZE);
         questionLabel.setMaxHeight(Region.USE_COMPUTED_SIZE);
 
+        HBox imageBox = new HBox();
+        imageBox.setPadding(new Insets(10));
+        imageBox.setAlignment(Pos.CENTER);
+        for (File file : question.getImageFiles()) {
+
+            Image image = new Image(file.toURI().toString());
+            ImageView imageView = new ImageView(image);
+            imageBox.setBackground(new Background(new BackgroundFill(Color.valueOf("#7ea6a5"), null, null)));
+
+            imageView.setFitWidth(300);
+            imageView.setFitHeight(300);
+            imageView.setPreserveRatio(true);
+            imageView.setOnMouseClicked(event -> openFullScreenImage(file));
+
+            imageBox.getChildren().add(imageView);
+        }
+
         VBox answersVBox = new VBox();
         answersVBox.setPadding(new Insets(20));
 
-        vBox.getChildren().addAll(questionLabel, answersVBox);
+        ScrollPane scrollPane = new ScrollPane();
+        vBox.getChildren().addAll(questionLabel, imageBox, answersVBox);
+
+        scrollPane.setContent(vBox);
+        scrollPane.setFitToWidth(true);
+        scrollPane.setFitToHeight(true);
 
         if (question.isMultiChoice()) {
             for (Answer answer : question.getAnswers()) {
@@ -150,7 +199,7 @@ public class FXMLController implements Initializable {
             }
         }
 
-        tab.setContent(vBox);
+        tab.setContent(scrollPane);
         questionBox.getTabs().add(tab);
     }
 
@@ -181,9 +230,9 @@ public class FXMLController implements Initializable {
 
         for (Question question : questionList)
         {
-            VBox vbox = (VBox) questionBox.getTabs().get(questionList.indexOf(question)).getContent();
+            VBox vbox = (VBox) ((ScrollPane) questionBox.getTabs().get(questionList.indexOf(question)).getContent()).getContent();
 
-            VBox answerBox = (VBox) vbox.getChildren().get(1);
+            VBox answerBox = (VBox) vbox.getChildren().get(2);
 
             boolean isAllRight = true;
             for (int i = 0; i < answerBox.getChildren().size(); i++)
@@ -231,5 +280,24 @@ public class FXMLController implements Initializable {
         alert.setContentText("Pisteet: " + currentScore + "/" + maxScore + "\nOnnistumisprosentti: " + percentageText + "%");
 
         alert.showAndWait();
+    }
+    private void openFullScreenImage(File file) {
+        Stage imageStage = new Stage();
+        imageStage.initModality(Modality.NONE);
+
+        Image fullImage = new Image(file.toURI().toString());
+        ImageView fullImageView = new ImageView(fullImage);
+
+        fullImageView.setFitWidth(600);
+        fullImageView.setFitHeight(600);
+        fullImageView.setPreserveRatio(true);
+
+        StackPane root = new StackPane();
+        root.getChildren().add(fullImageView);
+
+        Scene scene = new Scene(root);
+        imageStage.setScene(scene);
+        imageStage.setTitle(file.getName());
+        imageStage.show();
     }
 }

@@ -46,7 +46,7 @@ public class QuestionBuilder
                         if (currentQuestion != null) {
                             questionList.add(currentQuestion);
                         }
-                        currentQuestion = new Question(line.replaceAll("\\[/Q]", "").replaceAll("\\[Q]", ""));
+                        currentQuestion = new Question(line.replaceAll("\\[/Q]", "").replaceAll("\\[Q]", ""), file.getParent());
                         endFound = false;
                         endTag = "[/Q]";
 
@@ -66,6 +66,11 @@ public class QuestionBuilder
                         if(line.endsWith(endTag)) {
                             endFound = true;
                             endTag = "";
+                        }
+                    } else if (line.startsWith("[/IMG]")) {
+                        String path = line.replaceAll("\\[/IMG]", "");
+                        if(line.endsWith("[/IMG]") && currentQuestion != null) {
+                            currentQuestion.addImage(path);
                         }
                     }
                 }

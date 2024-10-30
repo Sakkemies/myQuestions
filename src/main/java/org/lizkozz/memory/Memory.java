@@ -11,7 +11,7 @@ import java.util.List;
 public class Memory
 {
     private static List<Question> questions;
-    public static void initialize() {}
+    public static void initialize() {questions = new ArrayList<>();}
     public static List<Question> getQuestions() {return questions == null ? new ArrayList<>() : questions;}
     public static void clearQuestions() {questions = new ArrayList<>();}
     public static void setQuestions(File file) {

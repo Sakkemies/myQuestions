@@ -1,20 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.Label?>
-
 <?import javafx.scene.control.MenuBar?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.control.TabPane?>
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ScrollPane?>
 <VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0"
       prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="org.lizkozz.FXMLController">
     <MenuBar fx:id="menuBar"/>
-    <TabPane fx:id="questionBox"/>
-    <HBox alignment="BOTTOM_CENTER" spacing="10" VBox.vgrow="NEVER">
-        <Button fx:id="previousQuestion" text="Edellinen"/>
-        <Button fx:id="nextQuestion" text="Seuraava"/>
-        <Button fx:id="submit" text="Valmis"/>
+    <TabPane fx:id="questionBox" VBox.vgrow="ALWAYS"/>
+    <HBox fx:id="buttonBox" alignment="BOTTOM_CENTER" spacing="10">
+        <HBox alignment="CENTER_LEFT" spacing="10" HBox.hgrow="ALWAYS">
+            <Button fx:id="previousQuestion" text="Edellinen"/>
+            <Button fx:id="nextQuestion" text="Seuraava"/>
+        </HBox>
+        <HBox alignment="CENTER_RIGHT" spacing="10">
+            <Button fx:id="submit" text="Valmis"/>
+        </HBox>
     </HBox>
 </VBox>

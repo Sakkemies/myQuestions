@@ -3,6 +3,7 @@ package org.lizkozz;
 import javafx.application.Application;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 import org.lizkozz.memory.Memory;
 import org.lizkozz.resources.Resource;
@@ -20,7 +21,7 @@ public class MainApp extends Application {
         Scene scene = new Scene(root);
         scene.getStylesheets().add(ResourceHandler.getResourceAsString(this,Resource.STYLES));
 
-        stage.setTitle("myQuestions v0.1");
+        stage.setTitle("myQuestions v0.2");
         stage.setScene(scene);
         stage.show();
     }

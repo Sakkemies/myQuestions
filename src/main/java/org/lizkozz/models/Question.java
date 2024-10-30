@@ -1,5 +1,6 @@
 package org.lizkozz.models;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -7,9 +8,24 @@ public class Question
 {
     private String question;
     private List<Answer> answerList;
-    public Question(String text) {
+    private List<String> images;
+    private String path;
+    public Question(String text, String path) {
         question = text;
         answerList = new ArrayList<>();
+        this.path = path;
+    }
+    public String getPath()
+    {
+        return path;
+    }
+    public List<File> getImageFiles()
+    {
+        List<File> files = new ArrayList<>();
+        for(String str: getImages())
+            files.add(new File(path+"/"+str));
+
+        return files;
     }
     public List<Answer> getAnswers()
     {
@@ -65,5 +81,16 @@ public class Question
         {
             return false;
         }
+    }
+    public void addImage(String path)
+    {
+        if(images == null)
+            images = new ArrayList<>();
+
+        images.add(path);
+    }
+    public List<String> getImages()
+    {
+        return images == null ? new ArrayList<>() : images;
     }
 }

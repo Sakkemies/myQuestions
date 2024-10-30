@@ -18,7 +18,44 @@
     -fx-background-color: #7ea6a5;
 }
 
-.menu .label
-{
+.menu .label {
     -fx-text-fill: black;
+}
+
+.button {
+    -fx-font-size: 16;
+    -fx-background-color: #e8eded;
+    -fx-padding: 10;
+    -fx-effect: dropshadow(one-pass-box, rgba(0, 0, 0, 0.3), 10, 0.0, 0, 0);
+    -fx-background-radius: 40;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+}
+.button:hover {
+    -fx-background-color: white;
+    -fx-effect: dropshadow(one-pass-box, rgba(255, 255, 255, 0.7), 20, 0.0, 0, 0);
+}
+
+.tab {
+    -fx-background-color: #7ea6a5;
+    -fx-text-base-color: white;
+    -fx-font-size: 12;
+    -fx-padding: 5;
+}
+
+.tab:hover {
+    -fx-background-color: #99bfbe;
+    -fx-text-base-color: white;
+}
+
+.tab:selected {
+    -fx-background-color: white;
+    -fx-text-base-color: black;
+}
+
+.tab-pane {
+    -fx-text-fill: white;
+    -fx-background-color: #f0f0f0;
+    -fx-border-color: #c0c0c0;
+    -fx-border-width: 0;
 }
