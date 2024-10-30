@@ -10,6 +10,9 @@ import java.util.List;
 
 public class Memory
 {
+    private static boolean shuffleOn = true;
+    public static void setShuffle(boolean shuffle) {shuffleOn = shuffle;}
+    public static boolean isShuffle(){return shuffleOn;}
     private static List<Question> questions;
     public static void initialize() {questions = new ArrayList<>();}
     public static List<Question> getQuestions() {return questions == null ? new ArrayList<>() : questions;}
@@ -25,8 +28,10 @@ public class Memory
     }
     public static void shuffle()
     {
-        Collections.shuffle(questions);
-        for(Question question: questions)
-            Collections.shuffle(question.getAnswers());
+        if(isShuffle()) {
+            Collections.shuffle(questions);
+            for (Question question : questions)
+                Collections.shuffle(question.getAnswers());
+        }
     }
 }

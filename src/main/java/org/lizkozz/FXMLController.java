@@ -15,6 +15,7 @@ import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.effect.DropShadow;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
@@ -41,6 +42,8 @@ public class FXMLController implements Initializable {
     @FXML
     public HBox buttonBox;
     @FXML
+    public Button check;
+    @FXML
     private MenuBar menuBar;
 
     @Override
@@ -64,11 +67,13 @@ public class FXMLController implements Initializable {
         previousQuestion.setOnAction(event -> switchToPreviousTab());
 
         submit.setOnAction(event -> checkAllAnswers());
+        check.setOnAction(event -> checkCurrentAnswer());
         updateButtonState();
 
-        setButtonSize(150,100, nextQuestion);
-        setButtonSize(150,100, submit);
-        setButtonSize(150,100, previousQuestion);
+        setButtonSize(120,100, nextQuestion);
+        setButtonSize(120,100, submit);
+        setButtonSize(120,100, check);
+        setButtonSize(120,100, previousQuestion);
 
         buttonBox.setPadding(new Insets(10));
         buttonBox.setBackground(new Background(new BackgroundFill(Color.valueOf("#7ea6a5"), null, null)));
@@ -103,7 +108,18 @@ public class FXMLController implements Initializable {
 
         fileMenu.getItems().addAll(clearQuestions, loadQuestions, exit);
 
-        menuBar.getMenus().add(fileMenu);
+        Menu optionsMenu = UIUtilities.getMenu("Asetukset");
+
+        CheckMenuItem shuffle = UIUtilities.getCheckMenuItem("Sekoita kysymykset");
+        shuffle.setOnAction(event -> {
+            Memory.setShuffle(!Memory.isShuffle());
+            shuffle.setSelected(Memory.isShuffle());
+        });
+        shuffle.setSelected(Memory.isShuffle());
+
+        optionsMenu.getItems().addAll(shuffle);
+
+        menuBar.getMenus().addAll(fileMenu, optionsMenu);
     }
 
     private void refresh()
@@ -142,6 +158,8 @@ public class FXMLController implements Initializable {
 
         HBox imageBox = new HBox();
         imageBox.setPadding(new Insets(10));
+        imageBox.setSpacing(4);
+
         imageBox.setAlignment(Pos.CENTER);
         for (File file : question.getImageFiles()) {
 
@@ -149,8 +167,21 @@ public class FXMLController implements Initializable {
             ImageView imageView = new ImageView(image);
             imageBox.setBackground(new Background(new BackgroundFill(Color.valueOf("#7ea6a5"), null, null)));
 
-            imageView.setFitWidth(300);
-            imageView.setFitHeight(300);
+            double imageWidth = image.getWidth();
+            double imageHeight = image.getHeight();
+            double minSize = 250;
+
+            imageView.setFitWidth(Math.min(minSize, imageWidth));
+            imageView.setFitHeight(Math.min(minSize, imageHeight));
+
+            DropShadow dropShadow = new DropShadow();
+            dropShadow.setColor(Color.BLACK);
+            dropShadow.setOffsetX(0);
+            dropShadow.setOffsetY(0);
+            dropShadow.setRadius(10);
+
+            imageView.setEffect(dropShadow);
+
             imageView.setPreserveRatio(true);
             imageView.setOnMouseClicked(event -> openFullScreenImage(file));
 
@@ -223,6 +254,41 @@ public class FXMLController implements Initializable {
         previousQuestion.setDisable(currentIndex == 0 || Memory.getQuestions().isEmpty());
         nextQuestion.setDisable(currentIndex == questionBox.getTabs().size() - 1);
     }
+
+    private void checkCurrentAnswer() {
+        try {
+            int currentIndex = questionBox.getSelectionModel().getSelectedIndex();
+            Question question = Memory.getQuestions().get(currentIndex);
+
+            VBox vbox = (VBox) ((ScrollPane) questionBox.getTabs().get(currentIndex).getContent()).getContent();
+
+            VBox answerBox = (VBox) vbox.getChildren().get(2);
+
+            for (int i = 0; i < answerBox.getChildren().size(); i++)
+            {
+                Node node = answerBox.getChildren().get(i);
+                if (node instanceof CheckBox checkBox)
+                {
+                    boolean isTrue = question.isCorrect(checkBox.isSelected(), i);
+                    if(!isTrue) {
+                        checkBox.setBackground(new Background(new BackgroundFill(Color.valueOf(COLOR_RED), null, null)));
+                    }
+                    else
+                        checkBox.setBackground(new Background(new BackgroundFill(Color.valueOf(COLOR_GREEN), null, null)));
+                }
+                else if (node instanceof RadioButton checkBox)
+                {
+                    boolean isTrue = question.isCorrect(checkBox.isSelected(), i);
+                    if(!isTrue) {
+                        checkBox.setBackground(new Background(new BackgroundFill(Color.valueOf(COLOR_RED), null, null)));
+                    }
+                    else
+                        checkBox.setBackground(new Background(new BackgroundFill(Color.valueOf(COLOR_GREEN), null, null)));
+                }
+            }
+        }
+        catch (Exception e){}
+    }
     private void checkAllAnswers() {
         List<Question> questionList = Memory.getQuestions();
         int maxScore = questionList.size();
@@ -244,11 +310,10 @@ public class FXMLController implements Initializable {
                     if(!isTrue)
                     {
                         isAllRight = false;
-                        checkBox.setBackground(new Background(new BackgroundFill(Color.valueOf("#ff9ca5"), null, null)));
-                        //checkBox.setText(checkBox.getText() + " (VIRHEELLINEN!)");
+                        checkBox.setBackground(new Background(new BackgroundFill(Color.valueOf(COLOR_RED), null, null)));
                     }
                     else
-                        checkBox.setBackground(new Background(new BackgroundFill(Color.valueOf("#bdffbd"), null, null)));
+                        checkBox.setBackground(new Background(new BackgroundFill(Color.valueOf(COLOR_GREEN), null, null)));
 
                 }
                 else if (node instanceof RadioButton checkBox)
@@ -257,11 +322,10 @@ public class FXMLController implements Initializable {
                     if(!isTrue)
                     {
                         isAllRight = false;
-                        checkBox.setBackground(new Background(new BackgroundFill(Color.valueOf("#ff9ca5"), null, null)));
-                        //checkBox.setText(checkBox.getText() + " (VIRHEELLINEN!)");
+                        checkBox.setBackground(new Background(new BackgroundFill(Color.valueOf(COLOR_RED), null, null)));
                     }
                     else
-                        checkBox.setBackground(new Background(new BackgroundFill(Color.valueOf("#bdffbd"), null, null)));
+                        checkBox.setBackground(new Background(new BackgroundFill(Color.valueOf(COLOR_GREEN), null, null)));
                 }
             }
             if(isAllRight)
@@ -270,6 +334,8 @@ public class FXMLController implements Initializable {
 
         showScoreDialog(currentScore, maxScore);
     }
+    private String COLOR_RED = "#f7cde3";
+    private String COLOR_GREEN = "#cdf7d2";
     private void showScoreDialog(int currentScore, int maxScore) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle("Tulos");
@@ -288,12 +354,18 @@ public class FXMLController implements Initializable {
         Image fullImage = new Image(file.toURI().toString());
         ImageView fullImageView = new ImageView(fullImage);
 
-        fullImageView.setFitWidth(600);
-        fullImageView.setFitHeight(600);
+        fullImageView.setFitWidth(fullImage.getWidth());
+        fullImageView.setFitHeight(fullImage.getWidth());
         fullImageView.setPreserveRatio(true);
 
+        ScrollPane scrollPane = new ScrollPane();
+
+        scrollPane.setContent(fullImageView);
+        scrollPane.setFitToWidth(true);
+        scrollPane.setFitToHeight(true);
+
         StackPane root = new StackPane();
-        root.getChildren().add(fullImageView);
+        root.getChildren().add(scrollPane);
 
         Scene scene = new Scene(root);
         imageStage.setScene(scene);

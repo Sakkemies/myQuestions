@@ -1,7 +1,10 @@
 package org.lizkozz.models;
 
+import org.lizkozz.memory.Memory;
+
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class Question
@@ -24,6 +27,9 @@ public class Question
         List<File> files = new ArrayList<>();
         for(String str: getImages())
             files.add(new File(path+"/"+str));
+
+        if(Memory.isShuffle())
+            Collections.shuffle(files);
 
         return files;
     }
