@@ -1,5 +1,6 @@
 package org.lizkozz.memory;
 
+import org.lizkozz.file.FileHandler;
 import org.lizkozz.models.Question;
 import org.lizkozz.models.QuestionBuilder;
 
@@ -10,15 +11,24 @@ import java.util.List;
 
 public class Memory
 {
-    private static String version = "0.3.0";
+    public static String FILE_SETTINGS = "settings.set";
+    private static String version = "0.4.0";
     private static String appName = "myQuestions";
+    public static int MAX_AMOUNT_OF_QUESTIONS = 1000;
+    private static int amountOfQuestions = MAX_AMOUNT_OF_QUESTIONS;
     private static boolean shuffleOn = true;
     public static void setShuffle(boolean shuffle) {shuffleOn = shuffle;}
     public static boolean isShuffle(){return shuffleOn;}
     private static List<Question> questions;
-    public static void initialize() {questions = new ArrayList<>();}
+    public static void initialize()
+    {
+        questions = new ArrayList<>();
+        new FileHandler().loadSettings();
+    }
     public static List<Question> getQuestions() {return questions == null ? new ArrayList<>() : questions;}
     public static void clearQuestions() {questions = new ArrayList<>();}
+    public static int getAmountOfQuestions(){return amountOfQuestions;}
+    public static void setAmountOfQuestions(int amount){amountOfQuestions = amount;}
     public static void setQuestions(File file) {
         try {questions = new QuestionBuilder().build(file);}
         catch (Exception ignored) {}

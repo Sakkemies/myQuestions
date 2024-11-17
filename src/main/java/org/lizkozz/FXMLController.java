@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.ResourceBundle;
 
 import javafx.application.Platform;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
@@ -16,6 +17,7 @@ import javafx.scene.control.*;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.stage.Modality;
@@ -108,30 +110,87 @@ public class FXMLController implements Initializable {
 
         Menu optionsMenu = UIUtilities.getMenu("Asetukset");
 
-        CheckMenuItem shuffle = UIUtilities.getCheckMenuItem("Sekoita kysymykset");
-        shuffle.setOnAction(event -> {
-            Memory.setShuffle(!Memory.isShuffle());
-            shuffle.setSelected(Memory.isShuffle());
+        MenuItem settings = UIUtilities.getMenuItem("Asetukset...");
+        settings.setOnAction(event -> {
+            showSettingsDialog();
         });
-        shuffle.setSelected(Memory.isShuffle());
 
-        optionsMenu.getItems().addAll(shuffle);
+        optionsMenu.getItems().addAll(settings);
 
         menuBar.getMenus().addAll(fileMenu, optionsMenu);
     }
 
+    private void showSettingsDialog() {
+        Stage dialog = new Stage();
+        dialog.setTitle("Asetukset");
+
+        VBox layout = new VBox(10);
+        layout.setPadding(new Insets(15));
+
+        CheckBox shuffleCheckBox = new CheckBox("Sekoita kysymykset");
+        shuffleCheckBox.setSelected(Memory.isShuffle());
+        shuffleCheckBox.setOnAction(e -> Memory.setShuffle(shuffleCheckBox.isSelected()));
+
+        VBox sliderBox = new VBox();
+        Label label = new Label("Kysymysten määrä ( " + (Memory.getAmountOfQuestions() < Memory.MAX_AMOUNT_OF_QUESTIONS ? Memory.getAmountOfQuestions() + " kpl )" : "Kaikki )"));
+        Slider slider = new Slider(1, Memory.MAX_AMOUNT_OF_QUESTIONS, Memory.getAmountOfQuestions());
+        slider.setShowTickMarks(true);
+        slider.setShowTickLabels(true);
+
+        slider.valueProperty().addListener((observable, oldValue, newValue) -> {
+            Memory.setAmountOfQuestions(newValue.intValue());
+            label.setText("Kysymysten määrä ( " + (Memory.getAmountOfQuestions() < Memory.MAX_AMOUNT_OF_QUESTIONS ? Memory.getAmountOfQuestions() + " kpl )" : "Kaikki )"));
+        });
+        sliderBox.getChildren().addAll(label, slider);
+
+        Button okButton = new Button("OK");
+        okButton.setOnAction(e -> {
+            showResetConfirmationDialog();
+            dialog.close();
+            new FileHandler().saveSettings();
+        });
+
+        layout.getChildren().addAll(shuffleCheckBox, sliderBox, okButton);
+
+        Scene dialogScene = new Scene(layout, 300, 150);
+        dialog.setScene(dialogScene);
+        dialog.initModality(Modality.APPLICATION_MODAL);
+        dialog.showAndWait();
+    }
+    private void showResetConfirmationDialog() {
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("Kysymysten nollaus");
+        alert.setHeaderText("Nollataanko kysymykset, jotta muutokset astuvat voimaan?");
+        alert.setContentText("Jos olet vastannut kysymyksiin, edistymisesi nollaantuu.");
+
+        ButtonType buttonTypeOk = new ButtonType("Kyllä", ButtonBar.ButtonData.OK_DONE);
+        ButtonType buttonTypeCancel = new ButtonType("Ei", ButtonBar.ButtonData.CANCEL_CLOSE);
+
+        alert.getButtonTypes().setAll(buttonTypeOk, buttonTypeCancel);
+
+        alert.showAndWait().ifPresent(response -> {
+            if (response == buttonTypeOk) {
+                refresh();
+            }
+        });
+    }
     private void refresh()
     {
         Memory.shuffle();
         List<Question> questionList = Memory.getQuestions();
         questionBox.getTabs().clear();
 
+        int index = 1;
         for(int i = 0; i < questionList.size(); i++)
         {
+            if(index > Memory.getAmountOfQuestions() && Memory.getAmountOfQuestions() != Memory.MAX_AMOUNT_OF_QUESTIONS)
+                break;
             if(questionList.get(i).isValid()) {
                 Tab tab = new Tab();
                 tab.setText("Q" + (i + 1));
                 setQuestion(tab, questionList.get(i));
+
+                index++;
             }
         }
 
@@ -345,11 +404,15 @@ public class FXMLController implements Initializable {
     }
     private void checkAllQuestions() {
         List<Question> questionList = Memory.getQuestions();
-        int maxScore = questionList.size();
+        int maxScore = Memory.getAmountOfQuestions() == Memory.MAX_AMOUNT_OF_QUESTIONS ? questionList.size() : Memory.getAmountOfQuestions();
         int currentScore = 0;
 
+        int index = 1;
         for (Question question : questionList)
         {
+            if(index > Memory.getAmountOfQuestions() && Memory.getAmountOfQuestions() != Memory.MAX_AMOUNT_OF_QUESTIONS)
+                break;
+
             VBox vbox = (VBox) ((ScrollPane) questionBox.getTabs().get(questionList.indexOf(question)).getContent()).getContent();
 
             VBox answerBox = (VBox) vbox.getChildren().get(2);
@@ -365,6 +428,8 @@ public class FXMLController implements Initializable {
             }
             if(isAllRight)
                 currentScore++;
+
+            index++;
         }
 
         showScoreDialog(currentScore, maxScore);
